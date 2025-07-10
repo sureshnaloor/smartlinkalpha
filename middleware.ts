@@ -15,6 +15,7 @@ export async function middleware(request: NextRequest) {
     '/login', 
     '/signin',
     '/signup',
+    '/debug-env',
     '/api/auth/signin',
     '/api/auth/signout',
     '/api/auth/callback',
@@ -23,6 +24,7 @@ export async function middleware(request: NextRequest) {
   ].includes(nextUrl.pathname) || 
     nextUrl.pathname.startsWith('/_next') || 
     nextUrl.pathname.startsWith('/api/auth') ||
+    nextUrl.pathname.startsWith('/api/debug-env') ||
     nextUrl.pathname.includes('.')
 
   // If it's a protected route and user isn't logged in, redirect to login

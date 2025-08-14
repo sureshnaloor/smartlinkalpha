@@ -1,0 +1,33 @@
+module.exports = {
+  apps: [{
+    name: 'smartlink',
+    script: 'npm',
+    args: 'start',
+    cwd: '/path/to/your/app', 
+    env: {
+      NODE_ENV: 'production',
+      PORT: 3000,
+      HOSTNAME: '0.0.0.0',
+      NEXTAUTH_URL: 'https://yourdomain.com',
+      NEXTAUTH_SECRET: 'your-nextauth-secret-here',
+      MONGODB_URI: 'your-mongodb-connection-string',
+      MONGODB_DB: 'your-database-name',
+      GOOGLE_CLIENT_ID: 'your-google-client-id',
+      GOOGLE_CLIENT_SECRET: 'your-google-client-secret',
+      LINKEDIN_CLIENT_ID: 'your-linkedin-client-id',
+      LINKEDIN_CLIENT_SECRET: 'your-linkedin-client-secret',
+      ADMIN_EMAIL: 'admin@yourdomain.com',
+      ALLOWED_EMAIL_DOMAINS: 'domain1.com, domain2.com',
+      REQUIRE_ADMIN_APPROVAL: 'true',
+      EMAIL_FROM: 'noreply@yourdomain.com'
+    },
+    instances: 1,
+    autorestart: true,
+    watch: false,
+    max_memory_restart: '1G',
+    error_file: './logs/err.log',
+    out_file: './logs/out.log',
+    log_file: './logs/combined.log',
+    time: true
+  }]
+}

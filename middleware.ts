@@ -25,7 +25,13 @@ export async function middleware(request: NextRequest) {
     nextUrl.pathname.startsWith('/_next') || 
     nextUrl.pathname.startsWith('/api/auth') ||
     nextUrl.pathname.startsWith('/api/debug-env') ||
+    nextUrl.pathname.startsWith('/api/test-env') ||
     nextUrl.pathname.includes('.')
+
+  // Skip middleware for debug endpoints
+  if (nextUrl.pathname.startsWith('/api/debug-env') || nextUrl.pathname.startsWith('/api/test-env')) {
+    return NextResponse.next()
+  }
 
   // If it's a protected route and user isn't logged in, redirect to login
   if (!isPublicRoute && !isLoggedIn) {

@@ -21,6 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
+import { DemoToggle } from "@/components/DemoToggle";
 
 // Types for services projects
 type ProjectStatus = "completed" | "in-progress" | "awarded";
@@ -250,11 +251,12 @@ export default function ExperiencePage() {
           </DropdownMenu>
         </div>
 
-        <Tabs defaultValue="services" value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-white/60 border border-gray-200 p-0.5">
-            <TabsTrigger value="services" className="text-xs">Services & Projects</TabsTrigger>
-            <TabsTrigger value="materials" className="text-xs">Materials & Products</TabsTrigger>
-          </TabsList>
+        <DemoToggle title="Sample Experience Data">
+          <Tabs defaultValue="services" value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <TabsList className="bg-white/60 border border-gray-200 p-0.5">
+              <TabsTrigger value="services" className="text-xs">Services & Projects</TabsTrigger>
+              <TabsTrigger value="materials" className="text-xs">Materials & Products</TabsTrigger>
+            </TabsList>
 
           {/* Services Projects Tab Content */}
           <TabsContent value="services" className="space-y-4">
@@ -455,7 +457,8 @@ export default function ExperiencePage() {
               </Card>
             )}
           </TabsContent>
-        </Tabs>
+          </Tabs>
+        </DemoToggle>
       </div>
     </div>
   );

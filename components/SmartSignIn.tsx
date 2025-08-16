@@ -31,8 +31,13 @@ export function SmartSignIn({ className, callbackUrl = '/dashboard' }: SmartSign
     try {
       setIsLoading(true);
       setError(null);
-      // Use the proper signInWithProvider function
-      signInWithProvider(provider, { callbackUrl });
+      console.log('Starting social sign-in with:', provider, 'callbackUrl:', callbackUrl);
+      
+      // Use the proper signInWithProvider function - this will redirect to the OAuth provider
+      await signInWithProvider(provider, { callbackUrl });
+      
+      // Note: The function will redirect to the OAuth provider, so this code won't execute
+      // The user will be redirected back to the callbackUrl after successful authentication
     } catch (error) {
       console.error('Social sign-in error:', error);
       setError('An error occurred during social sign-in. Please try again.');

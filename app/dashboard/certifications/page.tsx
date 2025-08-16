@@ -17,6 +17,7 @@ import {
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
+import { DemoToggle } from "@/components/DemoToggle"
 
 export default function CertificationsPage() {
   const { toast } = useToast()
@@ -89,8 +90,9 @@ export default function CertificationsPage() {
           </Button>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {certifications.map((cert) => (
+        <DemoToggle title="Sample Certifications">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {certifications.map((cert) => (
             <Card 
               key={cert.id} 
               className="overflow-hidden transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl shadow-lg border-0"
@@ -190,7 +192,8 @@ export default function CertificationsPage() {
               </CardContent>
             </Card>
           ))}
-        </div>
+          </div>
+        </DemoToggle>
 
         <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
           <DialogContent className="sm:max-w-md">

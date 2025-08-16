@@ -7,10 +7,15 @@ import { signIn } from 'next-auth/react';
  */
 export async function signInWithProvider(provider: string, options?: { callbackUrl?: string }) {
   try {
+    console.log('signInWithProvider called with:', { provider, options });
+    
+    // For OAuth providers, we need to redirect to the provider's auth page
     await signIn(provider, { 
       callbackUrl: options?.callbackUrl || '/dashboard',
       redirect: true
     });
+    
+    // This line won't be reached due to redirect, but return success for consistency
     return { success: true };
   } catch (error) {
     console.error(`Error signing in with ${provider}:`, error);

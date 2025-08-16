@@ -33,6 +33,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/hooks/use-toast"
+import { DemoToggle } from "@/components/DemoToggle"
 
 type Document = {
   id: number
@@ -287,15 +288,16 @@ export default function DocumentsPage() {
           </DropdownMenu>
         </div>
 
-        <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-white/60 border border-gray-200 p-0.5">
-            <TabsTrigger value="all" className="text-xs">All</TabsTrigger>
-            <TabsTrigger value="registration" className="text-xs">Registration</TabsTrigger>
-            <TabsTrigger value="tax" className="text-xs">Tax</TabsTrigger>
-            <TabsTrigger value="compliance" className="text-xs">Compliance</TabsTrigger>
-            <TabsTrigger value="license" className="text-xs">Licenses</TabsTrigger>
-            <TabsTrigger value="other" className="text-xs">Other</TabsTrigger>
-          </TabsList>
+        <DemoToggle title="Sample Documents">
+          <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <TabsList className="bg-white/60 border border-gray-200 p-0.5">
+              <TabsTrigger value="all" className="text-xs">All</TabsTrigger>
+              <TabsTrigger value="registration" className="text-xs">Registration</TabsTrigger>
+              <TabsTrigger value="tax" className="text-xs">Tax</TabsTrigger>
+              <TabsTrigger value="compliance" className="text-xs">Compliance</TabsTrigger>
+              <TabsTrigger value="license" className="text-xs">Licenses</TabsTrigger>
+              <TabsTrigger value="other" className="text-xs">Other</TabsTrigger>
+            </TabsList>
 
           <TabsContent value="all" className="mt-6">
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -324,7 +326,8 @@ export default function DocumentsPage() {
               </div>
             </TabsContent>
           ))}
-        </Tabs>
+          </Tabs>
+        </DemoToggle>
 
         {filteredDocuments.length === 0 && (
           <div className="text-center py-12 bg-white/60 rounded-lg border border-gray-200 shadow-sm">

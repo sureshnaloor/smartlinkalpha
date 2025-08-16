@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import { Save, Building, Globe, MapPin, Phone, Mail, Users, Briefcase, Check, AlertCircle, Loader2 } from "lucide-react"
+import { Save, Building, Globe, MapPin, Phone, Mail, Users, Briefcase, Check, AlertCircle, Loader2, Trash2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
@@ -118,6 +118,7 @@ export default function ProfilePage() {
   const { toast } = useToast()
   const [activeTab, setActiveTab] = useState("basic-info")
   const [isLoading, setIsLoading] = useState(false)
+  const [isLoadingData, setIsLoadingData] = useState(true)
   const [completionPercent, setCompletionPercent] = useState(0)
   
   // Empty initial states instead of default values
@@ -141,6 +142,33 @@ export default function ProfilePage() {
     email: "",
   })
 
+  // Load profile data on component mount
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const response = await fetch('/api/profile');
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Loaded profile data:', data); // Debug log
+          setSavedBasicInfo(data.basicInfo);
+          setSavedContactInfo(data.contactInfo);
+          setCompletionPercent(data.completionPercentage);
+        }
+      } catch (error) {
+        console.error('Error loading profile:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load profile data.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoadingData(false);
+      }
+    };
+
+    loadProfile();
+  }, [toast]);
+
   // Calculate initial completion percentage when component mounts
   useEffect(() => {
     const percentage = calculateCompletionPercentage(savedBasicInfo, savedContactInfo);
@@ -149,77 +177,173 @@ export default function ProfilePage() {
 
   const basicInfoForm = useForm<z.infer<typeof basicInfoSchema>>({
     resolver: zodResolver(basicInfoSchema),
-    defaultValues: savedBasicInfo,
+    defaultValues: {
+      companyName: "",
+      companyWebsite: "",
+      companyDescription: "",
+      yearEstablished: "",
+      numberOfEmployees: "",
+      businessType: "",
+    },
   })
 
   const contactInfoForm = useForm<z.infer<typeof contactInfoSchema>>({
     resolver: zodResolver(contactInfoSchema),
-    defaultValues: savedContactInfo,
+    defaultValues: {
+      addressLine1: "",
+      addressLine2: "",
+      city: "",
+      state: "",
+      postalCode: "",
+      country: "",
+      phone: "",
+      email: "",
+    },
   })
 
-  function onBasicInfoSubmit(values: z.infer<typeof basicInfoSchema>) {
+  // Update form values when saved data changes and loading is complete
+  useEffect(() => {
+    if (!isLoadingData && Object.keys(savedBasicInfo).length > 0) {
+      console.log('Resetting basic info form with:', savedBasicInfo); // Debug log
+      basicInfoForm.reset(savedBasicInfo);
+      
+      // Add a small delay to ensure Select components are rendered before setting values
+      setTimeout(() => {
+        // Explicitly set Select field values to ensure they are selected
+        if (savedBasicInfo.numberOfEmployees) {
+          console.log('Setting numberOfEmployees to:', savedBasicInfo.numberOfEmployees);
+          basicInfoForm.setValue('numberOfEmployees', savedBasicInfo.numberOfEmployees);
+        }
+        if (savedBasicInfo.businessType) {
+          console.log('Setting businessType to:', savedBasicInfo.businessType);
+          basicInfoForm.setValue('businessType', savedBasicInfo.businessType);
+        }
+        
+        // Log current form values after setting
+        console.log('Form values after setting:', basicInfoForm.getValues());
+      }, 100);
+    }
+  }, [savedBasicInfo, basicInfoForm, isLoadingData]);
+
+  useEffect(() => {
+    if (!isLoadingData && Object.keys(savedContactInfo).length > 0) {
+      console.log('Resetting contact info form with:', savedContactInfo); // Debug log
+      contactInfoForm.reset(savedContactInfo);
+    }
+  }, [savedContactInfo, contactInfoForm, isLoadingData]);
+
+  // Watch form values for debugging
+  useEffect(() => {
+    const subscription = basicInfoForm.watch((value, { name, type }) => {
+      if (name === 'numberOfEmployees' || name === 'businessType') {
+        console.log(`Form field ${name} changed to:`, value[name as keyof typeof value]);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [basicInfoForm]);
+
+  async function onBasicInfoSubmit(values: z.infer<typeof basicInfoSchema>) {
     setIsLoading(true)
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false)
-      
-      // Save the updated values
-      setSavedBasicInfo(values);
-      
-      // Recalculate completion percentage
-      const percentage = calculateCompletionPercentage(values, savedContactInfo);
-      setCompletionPercent(percentage);
-      
-      toast({
-        title: "Profile updated",
-        description: "Your company profile has been updated successfully.",
-        variant: "default",
-      })
-      
-      // If profile is now complete
-      if (percentage === 100) {
+    try {
+      const response = await fetch('/api/profile/basic-info', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ basicInfo: values }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Save the updated values
+        setSavedBasicInfo(values);
+        setCompletionPercent(data.completionPercentage);
+        
         toast({
-          title: "Profile Complete!",
-          description: "Your company profile is now 100% complete.", 
+          title: "Profile updated",
+          description: data.message || "Your company profile has been updated successfully.",
           variant: "default",
         })
+        
+        // If profile is now complete
+        if (data.completionPercentage === 100) {
+          toast({
+            title: "Profile Complete!",
+            description: "Your company profile is now 100% complete.", 
+            variant: "default",
+          })
+        }
+      } else {
+        throw new Error(data.error || 'Failed to update profile');
       }
-    }, 1500)
+    } catch (error) {
+      console.error('Error updating basic info:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to update profile.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false);
+    }
   }
 
-  function onContactInfoSubmit(values: z.infer<typeof contactInfoSchema>) {
+  async function onContactInfoSubmit(values: z.infer<typeof contactInfoSchema>) {
     setIsLoading(true)
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false)
-      
-      // Save the updated values - ensure addressLine2 is a string
-      setSavedContactInfo({
-        ...values,
-        addressLine2: values.addressLine2 || ""  // Ensure addressLine2 is a string, not undefined
+    try {
+      const response = await fetch('/api/profile/contact-info', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          contactInfo: {
+            ...values,
+            addressLine2: values.addressLine2 || ""  // Ensure addressLine2 is a string, not undefined
+          }
+        }),
       });
-      
-      // Recalculate completion percentage
-      const percentage = calculateCompletionPercentage(savedBasicInfo, values);
-      setCompletionPercent(percentage);
-      
-      toast({
-        title: "Contact information updated",
-        description: "Your company contact details have been saved successfully.",
-        variant: "default",
-      })
-      
-      // If profile is now complete
-      if (percentage === 100) {
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Save the updated values
+        setSavedContactInfo({
+          ...values,
+          addressLine2: values.addressLine2 || ""
+        });
+        setCompletionPercent(data.completionPercentage);
+        
         toast({
-          title: "Profile Complete!",
-          description: "Your company profile is now 100% complete.",
+          title: "Contact information updated",
+          description: data.message || "Your company contact details have been saved successfully.",
           variant: "default",
         })
+        
+        // If profile is now complete
+        if (data.completionPercentage === 100) {
+          toast({
+            title: "Profile Complete!",
+            description: "Your company profile is now 100% complete.",
+            variant: "default",
+          })
+        }
+      } else {
+        throw new Error(data.error || 'Failed to update contact information');
       }
-    }, 1500)
+    } catch (error) {
+      console.error('Error updating contact info:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to update contact information.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   // Get the profile completion status text
@@ -248,6 +372,88 @@ export default function ProfilePage() {
     return "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800/30";
   }
 
+  // Delete profile function
+  const handleDeleteProfile = async () => {
+    if (!confirm('Are you sure you want to delete your profile? This action cannot be undone.')) {
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('/api/profile', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Reset form data
+        const emptyBasicInfo = {
+          companyName: "",
+          companyWebsite: "",
+          companyDescription: "",
+          yearEstablished: "",
+          numberOfEmployees: "",
+          businessType: "",
+        };
+        
+        const emptyContactInfo = {
+          addressLine1: "",
+          addressLine2: "",
+          city: "",
+          state: "",
+          postalCode: "",
+          country: "",
+          phone: "",
+          email: savedContactInfo.email, // Keep the user's email
+        };
+
+        setSavedBasicInfo(emptyBasicInfo);
+        setSavedContactInfo(emptyContactInfo);
+        setCompletionPercent(0);
+        
+        // Reset form values
+        basicInfoForm.reset(emptyBasicInfo);
+        contactInfoForm.reset(emptyContactInfo);
+        
+        toast({
+          title: "Profile deleted",
+          description: "Your profile has been deleted successfully.",
+          variant: "default",
+        });
+      } else {
+        throw new Error(data.error || 'Failed to delete profile');
+      }
+    } catch (error) {
+      console.error('Error deleting profile:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete profile.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Show loading state while fetching data
+  if (isLoadingData) {
+    return (
+      <div className="container px-3 bg-stone-50 max-w-5xl py-8 space-y-8">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="flex flex-col items-center space-y-4">
+            <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+            <p className="text-sm text-gray-500">Loading profile data...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container px-3 bg-stone-50 max-w-5xl py-8 space-y-8">
       <div className="relative flex flex-col space-y-3 md:space-y-0 md:flex-row md:items-start md:justify-between">
@@ -271,6 +477,18 @@ export default function ProfilePage() {
               <div className="h-full bg-gradient-to-r from-emerald-500 to-sky-500 rounded-full" style={{ width: `${completionPercent}%` }} />
             </Progress>
           </div>
+          {completionPercent > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDeleteProfile}
+              disabled={isLoading}
+              className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/20"
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete Profile
+            </Button>
+          )}
         </div>
       </div>
 
@@ -392,7 +610,12 @@ export default function ProfilePage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-sm font-medium">Number of Employees</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value} disabled={isLoading}>
+                          <Select 
+                            key={`employees-${savedBasicInfo.numberOfEmployees}`}
+                            onValueChange={field.onChange} 
+                            value={field.value || ""} 
+                            disabled={isLoading}
+                          >
                             <FormControl>
                               <div className="relative">
                                 <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-gray-400" />
@@ -422,10 +645,15 @@ export default function ProfilePage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-sm font-medium">Business Type</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value} disabled={isLoading}>
+                          <Select 
+                            key={`business-${savedBasicInfo.businessType}`}
+                            onValueChange={field.onChange} 
+                            value={field.value || ""} 
+                            disabled={isLoading}
+                          >
                             <FormControl>
                               <div className="relative">
-                                <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-gray-400" />
+                                <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                                 <SelectTrigger className="pl-10 h-10 bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700">
                                   <SelectValue placeholder="Select business type" />
                                 </SelectTrigger>

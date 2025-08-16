@@ -18,6 +18,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
+import { DemoToggle } from "@/components/DemoToggle";
 
 // Types
 interface FinancialDocument {
@@ -166,11 +167,12 @@ export default function FinancialsPage() {
           </div>
         </div>
 
-        <Tabs defaultValue="documents" value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-white/60 border border-gray-200 p-0.5">
-            <TabsTrigger value="documents" className="text-xs">Financial Documents</TabsTrigger>
-            <TabsTrigger value="privacy" className="text-xs">Privacy Information</TabsTrigger>
-          </TabsList>
+        <DemoToggle title="Sample Financial Data">
+          <Tabs defaultValue="documents" value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <TabsList className="bg-white/60 border border-gray-200 p-0.5">
+              <TabsTrigger value="documents" className="text-xs">Financial Documents</TabsTrigger>
+              <TabsTrigger value="privacy" className="text-xs">Privacy Information</TabsTrigger>
+            </TabsList>
 
           {/* Financial Documents Tab */}
           <TabsContent value="documents" className="space-y-6">
@@ -365,7 +367,8 @@ export default function FinancialsPage() {
               </CardContent>
             </Card>
           </TabsContent>
-        </Tabs>
+          </Tabs>
+        </DemoToggle>
       </div>
     </div>
   );

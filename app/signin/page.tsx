@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { SmartSignIn } from '@/components/SmartSignIn';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/auth';
+import { redirect } from 'next/navigation';
 
 export const metadata: Metadata = {
   title: 'Sign In | SmartLink',
@@ -11,12 +12,22 @@ export const metadata: Metadata = {
 export default async function SignInPage() {
   const session = await getServerSession(authOptions);
 
+  // If user is already authenticated, redirect to dashboard
+  if (session?.user) {
+    console.log('User already authenticated, redirecting to dashboard:', session.user.email);
+    redirect('/dashboard');
+  }
+
   // Show debugging info in development
   const debugInfo = process.env.NODE_ENV === 'development' ? {
     googleClientId: process.env.GOOGLE_CLIENT_ID?.substring(0, 8) + '...',
     isConfigured: !!process.env.GOOGLE_CLIENT_ID && !!process.env.GOOGLE_CLIENT_SECRET,
     callbackUrl: process.env.NEXTAUTH_URL + '/api/auth/callback/google',
     session: session ? 'Active' : 'None',
+    sessionUser: session?.user ? {
+      email: session.user.email,
+      name: session.user.name
+    } : null,
   } : null;
 
   return (

@@ -20,6 +20,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { DemoToggle } from "@/components/DemoToggle";
 
 // Define notification types
 type NotificationType = "message" | "document" | "alert";
@@ -186,9 +187,10 @@ export default function NotificationsPage() {
           </Tabs>
         </div>
 
-        <div className="grid gap-4">
-          {filteredNotifications.length > 0 ? (
-            filteredNotifications.map((notification) => (
+        <DemoToggle title="Sample Notifications">
+          <div className="grid gap-4">
+            {filteredNotifications.length > 0 ? (
+              filteredNotifications.map((notification) => (
               <Card 
                 key={notification.id} 
                 className={`transition-all duration-200 hover:shadow-md border border-gray-200 ${notification.read ? "opacity-75" : ""}`}
@@ -261,8 +263,9 @@ export default function NotificationsPage() {
                   : "You're all caught up!"}
               </p>
             </div>
-          )}
-        </div>
+            )}
+          </div>
+        </DemoToggle>
       </div>
     </div>
   );

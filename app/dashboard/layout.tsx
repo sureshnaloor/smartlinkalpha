@@ -19,6 +19,7 @@ import {
 
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { DashboardHeader } from "@/components/DashboardHeader"
 
 export default function DashboardLayout({
   children,
@@ -72,7 +73,12 @@ export default function DashboardLayout({
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 flex flex-col">
+        <DashboardHeader />
+        <div className="flex-1">
+          {children}
+        </div>
+      </main>
     </div>
   )
 }

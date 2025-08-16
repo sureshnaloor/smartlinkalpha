@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { DemoToggle } from "@/components/DemoToggle"
 
 type Message = {
   id: number
@@ -198,7 +199,8 @@ export default function MessagesPage() {
 
   return (
     <div className="flex h-[calc(100vh-4rem)] flex-col md:flex-row bg-zinc-50">
-      <div className="w-full md:w-80 border-r border-gray-200 flex flex-col bg-white shadow-md z-10">
+      <DemoToggle title="Sample Messages">
+        <div className="w-full md:w-80 border-r border-gray-200 flex flex-col bg-white shadow-md z-10">
         <div className="p-4 border-b border-gray-200 bg-slate-50">
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-semibold text-base">Messages</h2>
@@ -368,7 +370,8 @@ export default function MessagesPage() {
             </div>
           </div>
         )}
-      </div>
+        </div>
+      </DemoToggle>
     </div>
   )
 }

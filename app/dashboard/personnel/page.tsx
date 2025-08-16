@@ -30,6 +30,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { DemoToggle } from "@/components/DemoToggle";
 
 // Enums and types
 type Role = 
@@ -296,9 +297,10 @@ export default function PersonnelPage() {
           </DropdownMenu>
         </div>
 
-        <div className="space-y-6">
-          {filteredPersonnel.length > 0 ? (
-            filteredPersonnel.map((person) => (
+        <DemoToggle title="Sample Personnel Data">
+          <div className="space-y-6">
+            {filteredPersonnel.length > 0 ? (
+              filteredPersonnel.map((person) => (
               <Card key={person.id} className="overflow-hidden border-gray-200 bg-white shadow-sm hover:shadow-md transition-shadow">
                 <CardHeader className="bg-white p-6 md:p-5 border-b border-gray-100">
                   <div className="flex flex-col sm:flex-row gap-6">
@@ -443,8 +445,9 @@ export default function PersonnelPage() {
                 </Button>
               </div>
             </Card>
-          )}
-        </div>
+            )}
+          </div>
+        </DemoToggle>
       </div>
       
       {/* Confirmation Dialog */}
